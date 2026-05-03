@@ -1,0 +1,31 @@
+import { cn } from '@/lib/utils'
+
+const stageColors: Record<string, string> = {
+  NEW: 'bg-blue-100 text-blue-700',
+  CONTACT: 'bg-yellow-100 text-yellow-700',
+  NEGOTIATION: 'bg-orange-100 text-orange-700',
+  PROPOSAL: 'bg-purple-100 text-purple-700',
+  CLOSED: 'bg-green-100 text-green-700',
+  LOST: 'bg-red-100 text-red-700',
+  ACTIVE: 'bg-green-100 text-green-700',
+}
+
+interface BadgeProps {
+  label: string
+  stage?: string
+  className?: string
+}
+
+export function Badge({ label, stage, className }: BadgeProps) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+        stage ? stageColors[stage] ?? 'bg-gray-100 text-gray-600' : 'bg-muted text-primary',
+        className,
+      )}
+    >
+      {label}
+    </span>
+  )
+}

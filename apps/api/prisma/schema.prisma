@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Plan {
+  id         String    @id @default(uuid())
+  name       String
+  price      Decimal   @db.Decimal(10, 2)
+  maxUsers   Int
+  maxLeads   Int
+  maxNumbers Int
+  features   Json
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  companies  Company[]
+
+  @@map("plans")
+}
+
+model Company {
+  id             String    @id @default(uuid())
+  name           String
+  emailDomain    String    @unique
+  logoUrl        String?
+  planId         String
+  plan           Plan      @relation(fields: [planId], references: [id])
+  active         Boolean   @default(true)
+  whatsappConfig Json?
+  followUpDays   Int       @default(3)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  users         User[]
+  leads         Lead[]
+  conversations Conversation[]
+
+  @@map("companies")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(SELLER)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignedLeads  Lead[]          @relation("AssignedLeads")
+  pipelineEvents PipelineEvent[]
+  refreshTokens  RefreshToken[]
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  SELLER
+}
+
+model Lead {
+  id            String        @id @default(uuid())
+  companyId     String
+  company       Company       @relation(fields: [companyId], references: [id])
+  name          String
+  phone         String
+  email         String?
+  status        LeadStatus    @default(ACTIVE)
+  pipelineStage PipelineStage @default(NEW)
+  assignedTo    String?
+  assignedUser  User?         @relation("AssignedLeads", fields: [assignedTo], references: [id])
+  source        LeadSource    @default(WHATSAPP)
+  notes         String?
+  lastContact   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  conversations  Conversation[]
+  pipelineEvents PipelineEvent[]
+
+  @@unique([companyId, phone])
+  @@index([companyId, pipelineStage])
+  @@index([companyId, lastContact])
+  @@map("leads")
+}
+
+enum LeadStatus {
+  ACTIVE
+  CLOSED
+  LOST
+}
+
+enum PipelineStage {
+  NEW
+  CONTACT
+  NEGOTIATION
+  PROPOSAL
+  CLOSED
+  LOST
+}
+
+enum LeadSource {
+  WHATSAPP
+  MANUAL
+  IMPORT
+}
+
+model PipelineEvent {
+  id          String        @id @default(uuid())
+  leadId      String
+  lead        Lead          @relation(fields: [leadId], references: [id])
+  fromStage   PipelineStage
+  toStage     PipelineStage
+  triggeredBy String?
+  user        User?         @relation(fields: [triggeredBy], references: [id])
+  reason      String?
+  createdAt   DateTime      @default(now())
+
+  @@index([leadId, createdAt])
+  @@map("pipeline_events")
+}
+
+model Conversation {
+  id             String             @id @default(uuid())
+  companyId      String
+  company        Company            @relation(fields: [companyId], references: [id])
+  leadId         String
+  lead           Lead               @relation(fields: [leadId], references: [id])
+  whatsappNumber String
+  status         ConversationStatus @default(OPEN)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  messages Message[]
+
+  @@index([companyId, status])
+  @@index([leadId])
+  @@map("conversations")
+}
+
+enum ConversationStatus {
+  OPEN
+  CLOSED
+  WAITING
+}
+
+model Message {
+  id             String           @id @default(uuid())
+  conversationId String
+  conversation   Conversation     @relation(fields: [conversationId], references: [id])
+  direction      MessageDirection
+  body           String?
+  mediaUrl       String?
+  mediaType      String?
+  externalId     String?          @unique
+  sentAt         DateTime         @default(now())
+
+  @@index([conversationId, sentAt])
+  @@map("messages")
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  tokenHash String   @unique
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
