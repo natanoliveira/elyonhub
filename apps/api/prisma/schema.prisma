@@ -8,16 +8,17 @@ datasource db {
 }
 
 model Plan {
-  id         String    @id @default(uuid())
-  name       String
-  price      Decimal   @db.Decimal(10, 2)
-  maxUsers   Int
-  maxLeads   Int
-  maxNumbers Int
-  features   Json
-  active     Boolean   @default(true)
-  createdAt  DateTime  @default(now())
-  companies  Company[]
+  id           String    @id @default(uuid())
+  name         String
+  price        Decimal   @db.Decimal(10, 2)
+  maxUsers     Int
+  maxLeads     Int
+  maxNumbers   Int
+  features     Json
+  allowedMenus Json      @default("[]")
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  companies    Company[]
 
   @@map("plans")
 }
@@ -38,6 +39,8 @@ model Company {
   users         User[]
   leads         Lead[]
   conversations Conversation[]
+  finances      Finance[]
+  contracts     Contract[]
 
   @@map("companies")
 }
@@ -62,6 +65,7 @@ model User {
 }
 
 enum Role {
+  MASTER
   ADMIN
   SELLER
 }
@@ -85,6 +89,7 @@ model Lead {
 
   conversations  Conversation[]
   pipelineEvents PipelineEvent[]
+  contracts      Contract[]
 
   @@unique([companyId, phone])
   @@index([companyId, pipelineStage])
@@ -182,4 +187,92 @@ model RefreshToken {
   createdAt DateTime @default(now())
 
   @@map("refresh_tokens")
+}
+
+model Finance {
+  id          String        @id @default(uuid())
+  companyId   String
+  company     Company       @relation(fields: [companyId], references: [id])
+  type        FinanceType
+  description String
+  amount      Decimal       @db.Decimal(10, 2)
+  dueDate     DateTime
+  status      FinanceStatus @default(PENDING)
+  category    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  payments FinancePayment[]
+
+  @@index([companyId, status])
+  @@index([companyId, dueDate])
+  @@map("finances")
+}
+
+model FinancePayment {
+  id        String        @id @default(uuid())
+  financeId String
+  finance   Finance       @relation(fields: [financeId], references: [id], onDelete: Cascade)
+  amount    Decimal       @db.Decimal(10, 2)
+  method    PaymentMethod
+  paidAt    DateTime      @default(now())
+  notes     String?
+  createdAt DateTime      @default(now())
+
+  @@index([financeId])
+  @@map("finance_payments")
+}
+
+enum FinanceType {
+  INCOME
+  EXPENSE
+}
+
+enum FinanceStatus {
+  PENDING
+  PARTIAL
+  PAID
+}
+
+enum PaymentMethod {
+  CASH
+  PIX
+  CARD_CREDIT
+  CARD_DEBIT
+  TRANSFER
+  BOLETO
+}
+
+model Contract {
+  id            String         @id @default(uuid())
+  companyId     String
+  company       Company        @relation(fields: [companyId], references: [id])
+  leadId        String?
+  lead          Lead?          @relation(fields: [leadId], references: [id])
+  clientName    String
+  document      String?
+  phone         String
+  email         String?
+  contractValue Decimal        @db.Decimal(10, 2)
+  paymentType   PaymentType
+  startDate     DateTime
+  status        ContractStatus @default(ACTIVE)
+  notes         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([companyId, status])
+  @@map("contracts")
+}
+
+enum PaymentType {
+  CASH
+  FINANCING
+  CARD
+}
+
+enum ContractStatus {
+  ACTIVE
+  PENDING
+  CANCELED
 }

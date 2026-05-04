@@ -17,6 +17,11 @@ export class CompaniesController {
     return this.companiesService.findMe(companyId)
   }
 
+  @Get('me/plan')
+  findMyPlan(@CompanyId() companyId: string) {
+    return this.companiesService.findMe(companyId).then((c) => c.plan)
+  }
+
   @Patch('me')
   @Roles(Role.ADMIN)
   update(@CompanyId() companyId: string, @Body() dto: UpdateCompanyDto) {

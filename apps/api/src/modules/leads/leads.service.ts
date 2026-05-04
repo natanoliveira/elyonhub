@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common'
+import { Injectable, NotFoundException, ConflictException, HttpException, HttpStatus } from '@nestjs/common'
 import { PrismaService } from '@/database/prisma.service'
 import { CreateLeadDto } from './dto/create-lead.dto'
 import { UpdateLeadDto } from './dto/update-lead.dto'
@@ -63,6 +63,18 @@ export class LeadsService {
   }
 
   async create(companyId: string, dto: CreateLeadDto) {
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      include: { plan: true },
+    })
+    const currentCount = await this.prisma.lead.count({ where: { companyId } })
+    if (company && currentCount >= company.plan.maxLeads) {
+      throw new HttpException(
+        `Limite de ${company.plan.maxLeads} leads do plano ${company.plan.name} atingido`,
+        HttpStatus.PAYMENT_REQUIRED,
+      )
+    }
+
     const exists = await this.prisma.lead.findUnique({
       where: { companyId_phone: { companyId, phone: dto.phone } },
     })

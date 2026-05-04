@@ -12,6 +12,11 @@ import { MessagesModule } from './modules/messages/messages.module'
 import { WebhooksModule } from './modules/webhooks/webhooks.module'
 import { DashboardModule } from './modules/dashboard/dashboard.module'
 import { ReportsModule } from './modules/reports/reports.module'
+import { PlansModule } from './modules/plans/plans.module'
+import { ProfileModule } from './modules/profile/profile.module'
+import { FinanceModule } from './modules/finance/finance.module'
+import { ContractsModule } from './modules/contracts/contracts.module'
+import { AdminModule } from './modules/admin/admin.module'
 
 @Module({
   imports: [
@@ -28,6 +33,11 @@ import { ReportsModule } from './modules/reports/reports.module'
     WebhooksModule,
     DashboardModule,
     ReportsModule,
+    PlansModule,
+    ProfileModule,
+    FinanceModule,
+    ContractsModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

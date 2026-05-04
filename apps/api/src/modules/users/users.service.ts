@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common'
+import { Injectable, ConflictException, NotFoundException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common'
 import { PrismaService } from '@/database/prisma.service'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
@@ -26,6 +26,18 @@ export class UsersService {
   }
 
   async create(companyId: string, dto: CreateUserDto) {
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      include: { plan: true },
+    })
+    const currentCount = await this.prisma.user.count({ where: { companyId, active: true } })
+    if (company && currentCount >= company.plan.maxUsers) {
+      throw new HttpException(
+        `Limite de ${company.plan.maxUsers} usuários do plano ${company.plan.name} atingido`,
+        HttpStatus.PAYMENT_REQUIRED,
+      )
+    }
+
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } })
     if (exists) throw new ConflictException('Email já cadastrado')
 

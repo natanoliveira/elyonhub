@@ -27,10 +27,12 @@ export class ReportsController {
     @CompanyId() companyId: string,
     @Query('from') from: string,
     @Query('to') to: string,
+    @Query('stage') stage: string,
+    @Query('status') status: string,
     @Res() res: Response,
   ) {
-    const buffer = await this.reportsService.generateLeadsPDF(companyId, from, to)
-    this.sendPDF(res, buffer, 'leads.pdf')
+    const buffer = await this.reportsService.generateLeadsPDF(companyId, from, to, stage, status)
+    this.sendPDF(res, buffer, `leads-${new Date().toISOString().split('T')[0]}.pdf`)
   }
 
   @Get('conversion')
@@ -41,7 +43,7 @@ export class ReportsController {
     @Res() res: Response,
   ) {
     const buffer = await this.reportsService.generateConversionPDF(companyId, from, to)
-    this.sendPDF(res, buffer, 'conversao.pdf')
+    this.sendPDF(res, buffer, `conversao-${new Date().toISOString().split('T')[0]}.pdf`)
   }
 
   @Get('sales')
@@ -52,6 +54,31 @@ export class ReportsController {
     @Res() res: Response,
   ) {
     const buffer = await this.reportsService.generateSalesPDF(companyId, from, to)
-    this.sendPDF(res, buffer, 'vendas.pdf')
+    this.sendPDF(res, buffer, `vendas-${new Date().toISOString().split('T')[0]}.pdf`)
+  }
+
+  @Get('finance')
+  async financeReport(
+    @CompanyId() companyId: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @Query('type') type: string,
+    @Query('status') status: string,
+    @Res() res: Response,
+  ) {
+    const buffer = await this.reportsService.generateFinancePDF(companyId, from, to, type, status)
+    this.sendPDF(res, buffer, `financeiro-${new Date().toISOString().split('T')[0]}.pdf`)
+  }
+
+  @Get('contracts')
+  async contractsReport(
+    @CompanyId() companyId: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @Query('status') status: string,
+    @Res() res: Response,
+  ) {
+    const buffer = await this.reportsService.generateContractsPDF(companyId, from, to, status)
+    this.sendPDF(res, buffer, `contratos-${new Date().toISOString().split('T')[0]}.pdf`)
   }
 }

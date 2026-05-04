@@ -10,22 +10,32 @@ const stageColors: Record<string, string> = {
   ACTIVE: 'bg-green-100 text-green-700',
 }
 
-interface BadgeProps {
-  label: string
-  stage?: string
-  className?: string
+const variantClasses = {
+  default: 'bg-muted text-primary',
+  secondary: 'bg-gray-100 text-gray-600',
+  success: 'bg-green-100 text-green-700',
+  destructive: 'bg-red-100 text-red-600',
+  warning: 'bg-yellow-100 text-yellow-700',
 }
 
-export function Badge({ label, stage, className }: BadgeProps) {
+interface BadgeProps {
+  label?: string
+  stage?: string
+  variant?: keyof typeof variantClasses
+  className?: string
+  children?: React.ReactNode
+}
+
+export function Badge({ label, stage, variant = 'default', className, children }: BadgeProps) {
   return (
     <span
       className={cn(
         'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-        stage ? stageColors[stage] ?? 'bg-gray-100 text-gray-600' : 'bg-muted text-primary',
+        stage ? stageColors[stage] ?? 'bg-gray-100 text-gray-600' : variantClasses[variant],
         className,
       )}
     >
-      {label}
+      {children ?? label}
     </span>
   )
 }

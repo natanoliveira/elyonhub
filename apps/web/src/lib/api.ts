@@ -17,7 +17,9 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/')
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       originalRequest._retry = true
       try {
         const refreshToken = localStorage.getItem('refreshToken')
@@ -32,7 +34,8 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`
         return api(originalRequest)
       } catch {
-        localStorage.clear()
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
         document.cookie = 'accessToken=; path=/; max-age=0'
         window.location.href = '/login'
       }

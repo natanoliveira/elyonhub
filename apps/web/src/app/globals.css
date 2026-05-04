@@ -14,11 +14,37 @@
 }
 
 @layer utilities {
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 }
+
+@keyframes dialog-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes dialog-panel-in {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+@keyframes dialog-backdrop-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes dialog-panel-out {
+  from { opacity: 1; transform: scale(1)    translateY(0); }
+  to   { opacity: 0; transform: scale(0.96) translateY(6px); }
+}
+@keyframes drawer-in {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes drawer-out {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+.animate-dialog-backdrop-in  { animation: dialog-backdrop-in  0.18s ease-out forwards; }
+.animate-dialog-backdrop-out { animation: dialog-backdrop-out 0.15s ease-in  forwards; }
+.animate-dialog-panel-in     { animation: dialog-panel-in     0.2s  ease-out forwards; }
+.animate-dialog-panel-out    { animation: dialog-panel-out    0.15s ease-in  forwards; }
+.animate-drawer-in           { animation: drawer-in  0.25s cubic-bezier(0.32,0,0.67,0) forwards; }
+.animate-drawer-out          { animation: drawer-out 0.2s  cubic-bezier(0.32,0,0.67,0) forwards; }

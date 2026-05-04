@@ -2,6 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { dashboardService } from '@/services/dashboard.service'
+import { useAuthStore } from '@/stores/auth.store'
+import { Avatar } from '@/components/ui/avatar'
 import { StatCard } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Users, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react'
@@ -9,7 +11,15 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import { PIPELINE_STAGE_LABELS } from '@elyonhub/types'
 import Link from 'next/link'
 
+function getGreeting() {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 12) return 'Bom dia'
+  if (h >= 12 && h < 18) return 'Boa tarde'
+  return 'Boa noite'
+}
+
 export default function DashboardPage() {
+  const { user } = useAuthStore()
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard'],
     queryFn: () => dashboardService.getMetrics(),
@@ -37,7 +47,18 @@ export default function DashboardPage() {
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+      {/* Saudação */}
+      {user && (
+        <div className="flex items-center gap-3">
+          <Avatar name={user.name} size="lg" />
+          <div>
+            <p className="text-xl font-bold text-foreground">
+              {getGreeting()}, {user.name.split(' ')[0]}!
+            </p>
+            <p className="text-sm text-gray-400">Aqui está o resumo do seu negócio</p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <StatCard

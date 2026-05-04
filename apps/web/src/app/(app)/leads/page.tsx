@@ -90,44 +90,78 @@ export default function LeadsPage() {
           <p className="text-sm">Crie um novo lead ou ajuste os filtros</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border bg-white">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/20">
-                <th className="px-4 py-3 text-left font-medium text-gray-500">Nome</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 hidden sm:table-cell">Telefone</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500">Etapa</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 hidden md:table-cell">Vendedor</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-500 hidden md:table-cell">Último contato</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leads.map((lead: any) => (
-                <tr key={lead.id} className="border-b border-border last:border-0 hover:bg-muted/10">
-                  <td className="px-4 py-3">
-                    <Link href={`/leads/${lead.id}`} className="flex items-center gap-2 font-medium text-foreground hover:text-primary">
-                      {isOverdue(lead.lastContact, 3) && (
-                        <AlertCircle className="h-4 w-4 text-orange-400 shrink-0" />
-                      )}
-                      {lead.name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{formatPhoneBR(lead.phone)}</td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      label={PIPELINE_STAGE_LABELS[lead.pipelineStage as keyof typeof PIPELINE_STAGE_LABELS]}
-                      stage={lead.pipelineStage}
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{lead.assignedUser?.name ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-500 hidden md:table-cell">
-                    {lead.lastContact ? formatDateBR(lead.lastContact) : '—'}
-                  </td>
+        <>
+          {/* ── Desktop: tabela ── */}
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-border bg-white">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/20">
+                  <th className="px-4 py-3 text-left font-medium text-gray-500">Nome</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-500">Telefone</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-500">Etapa</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-500">Vendedor</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-500">Último contato</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {leads.map((lead: any) => (
+                  <tr key={lead.id} className="border-b border-border last:border-0 hover:bg-muted/10">
+                    <td className="px-4 py-3">
+                      <Link href={`/leads/${lead.id}`} className="flex items-center gap-2 font-medium text-foreground hover:text-primary">
+                        {isOverdue(lead.lastContact, 3) && (
+                          <AlertCircle className="h-4 w-4 text-orange-400 shrink-0" />
+                        )}
+                        {lead.name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-gray-500">{formatPhoneBR(lead.phone)}</td>
+                    <td className="px-4 py-3">
+                      <Badge
+                        label={PIPELINE_STAGE_LABELS[lead.pipelineStage as keyof typeof PIPELINE_STAGE_LABELS]}
+                        stage={lead.pipelineStage}
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-gray-500">{lead.assignedUser?.name ?? '—'}</td>
+                    <td className="px-4 py-3 text-gray-500">
+                      {lead.lastContact ? formatDateBR(lead.lastContact) : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ── Mobile: cards ── */}
+          <div className="flex flex-col gap-3 md:hidden">
+            {leads.map((lead: any) => (
+              <Link
+                key={lead.id}
+                href={`/leads/${lead.id}`}
+                className="rounded-lg border border-border bg-white p-4 shadow-sm space-y-2"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {isOverdue(lead.lastContact, 3) && (
+                      <AlertCircle className="h-4 w-4 text-orange-400 shrink-0" />
+                    )}
+                    <p className="font-semibold text-foreground truncate">{lead.name}</p>
+                  </div>
+                  <Badge
+                    label={PIPELINE_STAGE_LABELS[lead.pipelineStage as keyof typeof PIPELINE_STAGE_LABELS]}
+                    stage={lead.pipelineStage}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-sm text-gray-500">
+                  <span>{formatPhoneBR(lead.phone)}</span>
+                  <span>{lead.assignedUser?.name ?? '—'}</span>
+                </div>
+                {lead.lastContact && (
+                  <p className="text-xs text-gray-400">Último contato: {formatDateBR(lead.lastContact)}</p>
+                )}
+              </Link>
+            ))}
+          </div>
+        </>
       )}
 
       <Dialog
