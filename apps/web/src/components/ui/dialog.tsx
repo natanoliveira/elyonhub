@@ -19,7 +19,14 @@ export function Dialog({ open, onClose, title, description, children, footer, cl
   const [closing, setClosing] = useState(false)
 
   useEffect(() => {
-    if (open) { setClosing(false); setMounted(true) }
+    if (open) {
+      setClosing(false)
+      setMounted(true)
+    } else if (mounted && !closing) {
+      setClosing(true)
+      const t = setTimeout(() => { setMounted(false); setClosing(false) }, 150)
+      return () => clearTimeout(t)
+    }
   }, [open])
 
   useEffect(() => {

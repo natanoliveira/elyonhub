@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PrismaService } from '@/database/prisma.service'
-import { Resend } from 'resend'
+import { BrevoClient } from '@getbrevo/brevo'
 import { confirmEmailTemplate } from './templates/confirm-email'
 import { resetPasswordTemplate } from './templates/reset-password'
 
 @Injectable()
 export class EmailService {
-  private resend: Resend
+  private client: BrevoClient | undefined
   private from: string
   private readonly logger = new Logger(EmailService.name)
 
@@ -15,7 +15,10 @@ export class EmailService {
     private config: ConfigService,
     private prisma: PrismaService,
   ) {
-    this.resend = new Resend(this.config.get('RESEND_API_KEY'))
+    const apiKey = this.config.get<string>('BREVO_API_KEY')
+    if (apiKey) {
+      this.client = new BrevoClient({ apiKey })
+    }
     this.from = this.config.get('EMAIL_FROM', 'Elyon Hub <noreply@elyonhub.com.br>')
   }
 
@@ -34,20 +37,32 @@ export class EmailService {
   }
 
   private async send(to: string, subject: string, bodyText: string, bodyHtml: string, type: string) {
-    try {
-      await this.resend.emails.send({
-        from: this.from,
-        to,
-        subject,
-        html: bodyHtml,
-        text: bodyText,
-      })
-    } catch (err) {
-      this.logger.warn(`Falha ao enviar e-mail [${type}] para ${to}: ${err?.message}`)
+    if (!this.client) {
+      this.logger.warn(`BREVO_API_KEY não configurada — e-mail [${type}] para ${to} ignorado`)
+    } else {
+      try {
+        const [senderName, senderEmail] = this.parseFrom(this.from)
+        await this.client.transactionalEmails.sendTransacEmail({
+          sender: { name: senderName, email: senderEmail },
+          to: [{ email: to }],
+          subject,
+          htmlContent: bodyHtml,
+          textContent: bodyText,
+        })
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        this.logger.warn(`Falha ao enviar e-mail [${type}] para ${to}: ${message}`)
+      }
     }
 
     await this.prisma.emailLog.create({
       data: { to, subject, bodyText, type },
     })
+  }
+
+  private parseFrom(from: string): [string, string] {
+    const match = from.match(/^(.+?)\s*<(.+?)>$/)
+    if (match) return [match[1].trim(), match[2].trim()]
+    return ['Elyon Hub', from]
   }
 }
