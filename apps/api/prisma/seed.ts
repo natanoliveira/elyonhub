@@ -91,7 +91,7 @@ async function main() {
   const admin1 = await prisma.user.upsert({
     where: { email: 'admin@vendaspro.com.br' },
     update: {},
-    create: { companyId: company1.id, name: 'Natan Silva', email: 'admin@vendaspro.com.br', password: hash, role: 'ADMIN' },
+    create: { companyId: company1.id, name: 'Natan Silva', email: 'admin@vendaspro.com.br', password: hash, role: 'ADMIN', isVerified: true },
   })
   log(`✓ Admin   → ${admin1.email}  (senha: admin123)`)
 
@@ -359,14 +359,14 @@ async function main() {
   const admin2 = await prisma.user.upsert({
     where: { email: 'admin@conecta.io' },
     update: {},
-    create: { companyId: company2.id, name: 'Diego Campos', email: 'admin@conecta.io', password: hash, role: 'ADMIN' },
+    create: { companyId: company2.id, name: 'Diego Campos', email: 'admin@conecta.io', password: hash, role: 'ADMIN', isVerified: true },
   })
   log(`✓ Admin   → ${admin2.email}          (senha: admin123)`)
 
   const seller2 = await prisma.user.upsert({
     where: { email: 'pedro@conecta.io' },
     update: {},
-    create: { companyId: company2.id, name: 'Pedro Nunes', email: 'pedro@conecta.io', password: sellerHash, role: 'SELLER' },
+    create: { companyId: company2.id, name: 'Pedro Nunes', email: 'pedro@conecta.io', password: sellerHash, role: 'SELLER', isVerified: true },
   })
   log(`✓ Seller  → ${seller2.email}         (senha: seller123)`)
 

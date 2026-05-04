@@ -46,22 +46,37 @@ model Company {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  companyId String
-  company   Company  @relation(fields: [companyId], references: [id])
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(SELLER)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String    @id @default(uuid())
+  companyId         String
+  company           Company   @relation(fields: [companyId], references: [id])
+  name              String
+  email             String    @unique
+  password          String
+  role              Role      @default(SELLER)
+  active            Boolean   @default(true)
+  isVerified        Boolean   @default(false)
+  verificationToken String?   @unique
+  resetToken        String?   @unique
+  resetTokenAt      DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   assignedLeads  Lead[]          @relation("AssignedLeads")
   pipelineEvents PipelineEvent[]
   refreshTokens  RefreshToken[]
 
   @@map("users")
+}
+
+model EmailLog {
+  id        String   @id @default(uuid())
+  to        String
+  subject   String
+  bodyText  String
+  type      String
+  sentAt    DateTime @default(now())
+
+  @@map("email_logs")
 }
 
 enum Role {

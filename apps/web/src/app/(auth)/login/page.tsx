@@ -127,14 +127,24 @@ export default function LoginPage() {
               </p>
             )}
 
-            <Button type="submit" loading={isPending} className="w-full" size="lg">
-              Entrar
-            </Button>
+            <div className="flex items-center justify-between">
+              <Button type="submit" loading={isPending} className="w-full" size="lg">
+                Entrar
+              </Button>
+            </div>
           </form>
 
-          <p className="mt-8 text-center text-xs text-gray-400">
-            Não tem acesso?{' '}
-            <a href="/#planos" className="text-primary hover:underline">Conheça os planos</a>
+          <div className="mt-4 text-center">
+            <a href="/forgot-password" className="text-sm text-primary hover:underline">
+              Esqueci minha senha
+            </a>
+          </div>
+
+          <p className="mt-6 text-center text-xs text-gray-400">
+            Não tem conta?{' '}
+            <a href="/register" className="text-primary hover:underline font-medium">Criar conta</a>
+            {' · '}
+            <a href="/#planos" className="text-primary hover:underline">Ver planos</a>
           </p>
         </div>
       </div>

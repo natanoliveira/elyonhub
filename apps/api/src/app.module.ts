@@ -17,6 +17,7 @@ import { ProfileModule } from './modules/profile/profile.module'
 import { FinanceModule } from './modules/finance/finance.module'
 import { ContractsModule } from './modules/contracts/contracts.module'
 import { AdminModule } from './modules/admin/admin.module'
+import { EmailModule } from './modules/email/email.module'
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AdminModule } from './modules/admin/admin.module'
     FinanceModule,
     ContractsModule,
     AdminModule,
+    EmailModule,
   ],
 })
 export class AppModule {}

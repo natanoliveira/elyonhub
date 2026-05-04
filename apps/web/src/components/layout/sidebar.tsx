@@ -63,21 +63,30 @@ function SidebarContent({ onLinkClick }: { onLinkClick?: () => void }) {
           )
         })}
 
-        {/* Master admin link */}
+        {/* Master admin links */}
         {isMaster() && (
-          <Link
-            href="/admin"
-            onClick={onLinkClick}
-            className={cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all mt-2 border-t border-white/10 pt-3',
-              pathname.startsWith('/admin')
-                ? 'bg-white/15 text-white'
-                : 'text-white/40 hover:bg-white/10 hover:text-white',
-            )}
-          >
-            <ShieldCheck className="h-4 w-4 shrink-0" />
-            Admin Master
-          </Link>
+          <div className="mt-2 pt-3 border-t border-white/10 space-y-0.5">
+            {[
+              { href: '/admin', label: 'Menus por plano' },
+              { href: '/admin/companies', label: 'Empresas' },
+              { href: '/admin/email-logs', label: 'Logs de e-mail' },
+            ].map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={onLinkClick}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+                  pathname === href
+                    ? 'bg-white/15 text-white'
+                    : 'text-white/40 hover:bg-white/10 hover:text-white',
+                )}
+              >
+                <ShieldCheck className="h-4 w-4 shrink-0" />
+                {label}
+              </Link>
+            ))}
+          </div>
         )}
       </nav>
 
